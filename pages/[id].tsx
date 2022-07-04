@@ -172,6 +172,8 @@ export const getStaticProps = async (context: { params: { id: string } }) => {
   try {
     const { id } = context.params
     const page = await getPage(id)
+    if ('checkbox' in page.properties.Published && !page.properties.Published.checkbox) return { notFound: true }
+
     const block = await getBlock(id)
     const blocks = await getAllChildBlocks(block)
 

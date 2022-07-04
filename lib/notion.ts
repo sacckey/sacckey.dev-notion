@@ -17,6 +17,14 @@ export const getDatabase = async (): Promise<Page[]> => {
   const databaseId = process.env.NOTION_DATABASE_ID || ''
   const { results } = await notion.databases.query({
     database_id: databaseId,
+    filter: {
+      and: [{
+        "property": "Published",
+        "checkbox": {
+          "equals": true
+        }
+      }]
+    }
   })
 
   for (const page of results) if ('properties' in page) pages.push(page)
