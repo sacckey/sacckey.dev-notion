@@ -6,6 +6,9 @@ import { Fragment } from "react"
 
 export default function Post({ page, blocks }: { page: Page, blocks: Block[] }) {
   const title = 'title' in page.properties.Name ? page.properties.Name.title : null
+  const category = 'select' in page.properties.Category ? page.properties.Category.select?.name : ''
+  const tags = 'multi_select' in page.properties.Tags ? page.properties.Tags.multi_select : []
+  const date = new Intl.DateTimeFormat('ja-JP', {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tokyo"}).format(new Date(page.created_time))
 
   return (
     <div>
@@ -15,6 +18,7 @@ export default function Post({ page, blocks }: { page: Page, blocks: Block[] }) 
       </Head>
 
       <article className={styles.container}>
+        <p style={{ opacity: 0.65 }}>Posted on {date}</p>
         <h1 className={styles.name}>
           {title && (<Text texts={title} />)}
         </h1>
@@ -22,9 +26,31 @@ export default function Post({ page, blocks }: { page: Page, blocks: Block[] }) 
           {blocks.map((block) => (
             <Fragment key={block.id}>{renderBlock(block)}</Fragment>
           ))}
-          <Link href="/">
-            <a className={styles.back}>← Go home</a>
-          </Link>
+          <div style={{marginBottom: '10px'}}>
+            <div>
+              Category:{" "}
+              <Link href={`/categories/${category}`}>
+                <a>{category}</a>
+              </Link>
+            </div>
+            <div>
+              Tags:
+              {tags.map((tag) => (
+                <span key={tag.id}>
+                  {" "}
+                  <Link href={`/tags/${tag.name}`}>
+                    <a>{tag.name}</a>
+                  </Link>
+                  {" "}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Link href="/">
+              <a className={styles.back}>← Go home</a>
+            </Link>
+          </div>
         </section>
       </article>
     </div>
@@ -182,7 +208,7 @@ export const getStaticProps = async (context: { params: { id: string } }) => {
         page,
         blocks,
       },
-      revalidate: 60 * 10,
+      revalidate: 60 * 10
     }
   } catch (e) {
     throw new Error(`Failed to fetch post, received status ${e}`)

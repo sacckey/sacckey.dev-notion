@@ -12,19 +12,44 @@ const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 })
 
-export const getDatabase = async (): Promise<Page[]> => {
+export const getDatabase = async (condition?: {tag?: string, category?: string}): Promise<Page[]> => {
   const pages: Page[] = []
   const databaseId = process.env.NOTION_DATABASE_ID || ''
-  const { results } = await notion.databases.query({
-    database_id: databaseId,
-    filter: {
-      and: [{
-        "property": "Published",
-        "checkbox": {
-          "equals": true
-        }
-      }]
+  const tag = condition?.tag
+  const category = condition?.category
+  const conditions = []
+
+  conditions.push({
+    "property": "Published",
+    "checkbox": {
+      "equals": true
     }
+  })
+
+  if (tag) {
+    conditions.push( {
+      "property": "Tags",
+      "multi_select": {
+        "contains": tag
+      }
+    })
+  }
+
+  if (category) {
+    conditions.push( {
+      "property": "Category",
+      "select": {
+        "equals": category
+      }
+    })
+  }
+
+  const filter = {
+    and: conditions
+  }
+
+  const { results } = await notion.databases.query({
+    database_id: databaseId, filter
   })
 
   for (const page of results) if ('properties' in page) pages.push(page)

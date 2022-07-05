@@ -1,10 +1,10 @@
-import { getDatabase, Page } from "../lib/notion"
+import { getDatabase, Page } from "../../lib/notion"
 import Head from 'next/head'
-import styles from "./index.module.css"
+import styles from "../index.module.css"
 import Link from "next/link"
-import { Text } from "./[id]"
+import { Text } from "../[id]"
 
-export default function Home({ pages }: { pages: Page[] }) {
+export default function Home({ pages, tag }: { pages: Page[], tag: string }) {
   return (
     <div>
       <Head>
@@ -48,7 +48,7 @@ export default function Home({ pages }: { pages: Page[] }) {
           <h1>Next.js blog powered by Notion API</h1>
         </header>
 
-        <h2 className={styles.heading}>All Posts</h2>
+        <h2 className={styles.heading}>Tag: {tag}</h2>
         <ol className={styles.posts}>
           {
             pages.map((page) => {
@@ -79,12 +79,21 @@ export default function Home({ pages }: { pages: Page[] }) {
   )
 }
 
-export const getStaticProps = async () => {
-  const pages = await getDatabase()
+export const getStaticPaths = async () => {
+  return {
+    paths: [],
+    fallback: 'blocking',
+  }
+}
+
+export const getStaticProps = async (context: { params: { tag: string } }) => {
+  const { tag } = context.params
+  const pages = await getDatabase({ tag })
 
   return {
     props: {
-      pages
+      pages,
+      tag
     },
     revalidate: 60 * 10
   }
