@@ -64,6 +64,11 @@ export const Text = ({ texts }: { texts: RichText[] }) => {
         texts.map((value, index) => {
           const { plain_text, href, annotations: { bold, code, color, italic, strikethrough, underline } } = value
 
+          const style: React.CSSProperties = { whiteSpace: 'pre-wrap' }
+          if (color !== "default") {
+            style.color = color
+          }
+
           return (
             <span
               key={index}
@@ -74,7 +79,7 @@ export const Text = ({ texts }: { texts: RichText[] }) => {
                 strikethrough ? styles.strikethrough : "",
                 underline ? styles.underline : "",
               ].join(" ")}
-              style={color !== "default" ? { color } : {}}
+              style={style}
             >
               {href ? <a href={href}>{plain_text}</a> : plain_text}
             </span>
